@@ -1,0 +1,53 @@
+package guru.springframework.spring5webapp.bootstrap;
+
+import guru.springframework.spring5webapp.model.Author;
+import guru.springframework.spring5webapp.model.Book;
+import guru.springframework.spring5webapp.repositories.AuthorRepository;
+import guru.springframework.spring5webapp.repositories.BookRepository;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
+
+// We wont use this in PRODUCTION!
+// JUST FOR DEVELOPMENT. We will add something later to prevent this from running in proudction.
+
+@Component // This makes a Spring Bean, so now this would get wired up by the Spring Context
+public class DevBootstrap implements ApplicationListener<ContextRefreshedEvent> {
+
+    private AuthorRepository authorRepository;
+    private BookRepository bookRepository;
+
+    // We can use @Autowired or we can create a constructor to have the repositories injected.
+    // This class will get created and managed by the Spring Framework and the Author and Book
+    // Repository (which we are going to get an implemention of from Spring Data JPA) are going
+    // to get autowired into this class.
+    public DevBootstrap(AuthorRepository authorRepository, BookRepository bookRepository) {
+        this.authorRepository = authorRepository;
+        this.bookRepository = bookRepository;
+    }
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        initData();
+    }
+
+    private void initData() {
+        // Eric
+        Author eric = new Author("Eric", "Evans");
+        Book ddd = new Book("Domain Driven Design", "1234", "Harper Collins");
+        eric.getBooks().add(ddd);
+        ddd.getAuthors().add(eric);
+
+        authorRepository.save(eric);
+        bookRepository.save(ddd);
+
+        // Rod
+        Author rod = new Author("Rod", "Johnson");
+        Book noEJB = new Book("J2EE Development without EJB", "23444", "Worx");
+        rod.getBooks().add(noEJB);
+
+        authorRepository.save(rod);
+        bookRepository.save(noEJB);
+    }
+
+}
